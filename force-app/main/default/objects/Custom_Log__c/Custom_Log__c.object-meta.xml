@@ -149,16 +149,16 @@
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
     <enableReports>false</enableReports>
-    <enableSearch>true</enableSearch>
+    <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
-    <label>Jira Project</label>
+    <label>Custom Log</label>
     <nameField>
-        <label>Jira Project Name</label>
+        <label>Custom Log Name</label>
         <type>Text</type>
     </nameField>
-    <pluralLabel>Jira Projects</pluralLabel>
+    <pluralLabel>Custom Logs</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
