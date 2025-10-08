@@ -1,13 +1,7 @@
 /**
  * @description REST resource to handle incoming webhooks from various systems
  * Current implementation supports Jira webhooks at /webhook/jira
- * 
- * STUDENT TASK:
- * Complete the doPost method implementation to process incoming webhooks
- * 
- * IMPORTANT NOTE: without sharing is used to avoid sharing issues with the Jira_Issue__c and Jira_Project__c objects but it is not a good practice
- * 
- * @author Student Name
+ * @author Martin Messina
  */
 @RestResource(urlMapping='/webhook/*')
 global without sharing class WebhookResource {
@@ -15,19 +9,26 @@ global without sharing class WebhookResource {
     /**
      * @description Handles POST requests from webhooks
      * @return Returns a simple success response
-     * 
-     * STUDENT TASK:
-     * Implement this method to:
-     * 1. Get the REST request and response objects
-     * 2. Extract the webhook type from the URL path using getWebhookTypeFromPath
-     * 3. Process the webhook using WebhookFactory.processWebhook
-     * 4. Return an appropriate ResponseWrapper
-     * 5. Add error handling using try-catch
      */
     @HttpPost
     global static ResponseWrapper doPost() {
-        // TODO: Implement webhook processing logic
-        return new ResponseWrapper('error', 'Method not implemented');
+        RestRequest request = RestContext.request;
+        RestResponse response = RestContext.response;
+
+        try{
+            String webhookType = getWebhookTypeFromPath(request.requestURI);
+            WebhookFactory.processWebhook(webhookType, request);
+            return new ResponseWrapper('success', 'Processed successfully');
+        }
+        catch(JSONException e){
+            CustomLogger.insertLog(e, LoggingLevel.ERROR);
+            return new ResponseWrapper('error', 'Malformed JSON object');
+        }
+        catch(Exception e){
+            CustomLogger.insertLog(e, LoggingLevel.ERROR);
+            return new ResponseWrapper('error', 'Unsupported webhook type');
+        }
+
     }
     
     /**

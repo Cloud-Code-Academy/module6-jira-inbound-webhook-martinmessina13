@@ -1,9 +1,27 @@
 /**
  * @description Test class for WebhookResource
- * @author Your Name
+ * @author Martin Messina
  */
 @IsTest
 private class WebhookResourceTest {
+
+    final static String TEST_PROJECT_NAME = 'Test Project';
+    final static String TEST_PROJECT_KEY = 'TEST';
+    final static String TEST_DESCRIPTION = 'Test Description';
+    final static String TEST_ISSUE_SUMMARY = 'Test Issue Summary';
+    final static String TEST_ISSUE_TYPE = 'Task';
+
+    /**
+	 * Setup test data
+	 */
+	@TestSetup
+	static void setupTestData() {
+		TestDataFactory.createUserWithPermissionSets(
+			new List<String>{
+				'Jira_Group'
+			}
+		);
+    }
     
     /**
      * @description Test method for Jira issue created webhook
@@ -12,7 +30,7 @@ private class WebhookResourceTest {
     static void testJiraIssueCreatedWebhook() {
         // Create test request
         RestRequest req = new RestRequest();
-        req.requestURI = '/webhook/jira';
+        req.requestURI = 'https://mindful-koala-5nqgv-dev-ed.trailblaze.my.salesforce-sites.com/services/apexrest/webhook/jira';
         req.httpMethod = 'POST';
         
         // Create a sample Jira issue created payload
@@ -41,29 +59,33 @@ private class WebhookResourceTest {
         // Set the request and response
         RestContext.request = req;
         RestContext.response = new RestResponse();
-        
-        // Call the REST resource
-        Test.startTest();
-        WebhookResource.ResponseWrapper response = WebhookResource.doPost();
-        Test.stopTest();
-        
-        // Assert the response
-        Assert.areEqual('success', response.status, 'Response status should be success');
-        
-        // Verify that the Jira issue record was created
-        List<Jira_Issue__c> issues = [
-            SELECT Id, Issue_Key__c, Summary__c, Description__c, Issue_Type__c, Status__c, Project_Key__c
-            FROM Jira_Issue__c
-            WHERE Issue_Key__c = 'TEST-123'
-        ];
-        
-        Assert.areEqual(1, issues.size(), 'One Jira issue record should be created');
-        Assert.areEqual('TEST-123', issues[0].Issue_Key__c, 'Issue key should match');
-        Assert.areEqual('Test issue', issues[0].Summary__c, 'Summary should match');
-        Assert.areEqual('This is a test issue', issues[0].Description__c, 'Description should match');
-        Assert.areEqual('Bug', issues[0].Issue_Type__c, 'Issue type should match');
-        Assert.areEqual('Open', issues[0].Status__c, 'Status should match');
-        Assert.areEqual('TEST', issues[0].Project_Key__c, 'Project key should match');
+
+		User u = [SELECT Id FROM User WHERE Alias = 'testusr'];
+
+        System.runAs(u){
+            // Call the REST resource
+            Test.startTest();
+            WebhookResource.ResponseWrapper response = WebhookResource.doPost();
+            Test.stopTest();
+            
+            // Assert the response
+            Assert.areEqual('success', response.status, 'Response status should be success');
+            
+            // Verify that the Jira issue record was created
+            List<Jira_Issue__c> issues = [
+                SELECT Id, Issue_Key__c, Summary__c, Description__c, Issue_Type__c, Status__c, Project_Key__c
+                FROM Jira_Issue__c
+                WHERE Issue_Key__c = 'TEST-123'
+            ];
+            
+            Assert.areEqual(1, issues.size(), 'One Jira issue record should be created');
+            Assert.areEqual('TEST-123', issues[0].Issue_Key__c, 'Issue key should match');
+            Assert.areEqual('Test issue', issues[0].Summary__c, 'Summary should match');
+            Assert.areEqual('This is a test issue', issues[0].Description__c, 'Description should match');
+            Assert.areEqual('Bug', issues[0].Issue_Type__c, 'Issue type should match');
+            Assert.areEqual('Open', issues[0].Status__c, 'Status should match');
+            Assert.areEqual('TEST', issues[0].Project_Key__c, 'Project key should match');
+        }
     }
     
     /**
@@ -74,9 +96,9 @@ private class WebhookResourceTest {
         // Create a test issue record
         Jira_Issue__c testIssue = new Jira_Issue__c(
             Issue_Key__c = 'TEST-123',
-            Summary__c = 'Initial Summary',
+            Summary__c = TEST_ISSUE_SUMMARY,
             Description__c = 'Initial Description',
-            Issue_Type__c = 'Task',
+            Issue_Type__c = TEST_ISSUE_TYPE,
             Status__c = 'To Do',
             Project_Key__c = 'TEST',
             Last_Updated__c = Datetime.now()
@@ -115,28 +137,32 @@ private class WebhookResourceTest {
         // Set the request and response
         RestContext.request = req;
         RestContext.response = new RestResponse();
-        
-        // Call the REST resource
-        Test.startTest();
-        WebhookResource.ResponseWrapper response = WebhookResource.doPost();
-        Test.stopTest();
-        
-        // Assert the response
-        Assert.areEqual('success', response.status, 'Response status should be success');
-        
-        // Verify that the Jira issue record was updated
-        List<Jira_Issue__c> issues = [
-            SELECT Id, Issue_Key__c, Summary__c, Description__c, Issue_Type__c, Status__c, Project_Key__c
-            FROM Jira_Issue__c
-            WHERE Issue_Key__c = 'TEST-123'
-        ];
-        
-        Assert.areEqual(1, issues.size(), 'One Jira issue record should exist');
-        Assert.areEqual('TEST-123', issues[0].Issue_Key__c, 'Issue key should match');
-        Assert.areEqual('Updated Summary', issues[0].Summary__c, 'Summary should be updated');
-        Assert.areEqual('Updated Description', issues[0].Description__c, 'Description should be updated');
-        Assert.areEqual('Bug', issues[0].Issue_Type__c, 'Issue type should be updated');
-        Assert.areEqual('In Progress', issues[0].Status__c, 'Status should be updated');
+
+		User u = [SELECT Id FROM User WHERE Alias = 'testusr'];
+
+        System.runAs(u){            
+            // Call the REST resource
+            Test.startTest();
+            WebhookResource.ResponseWrapper response = WebhookResource.doPost();
+            Test.stopTest();
+            
+            // Assert the response
+            Assert.areEqual('success', response.status, 'Response status should be success');
+            
+            // Verify that the Jira issue record was updated
+            List<Jira_Issue__c> issues = [
+                SELECT Id, Issue_Key__c, Summary__c, Description__c, Issue_Type__c, Status__c, Project_Key__c
+                FROM Jira_Issue__c
+                WHERE Issue_Key__c = 'TEST-123'
+            ];
+            
+            Assert.areEqual(1, issues.size(), 'One Jira issue record should exist');
+            Assert.areEqual('TEST-123', issues[0].Issue_Key__c, 'Issue key should match');
+            Assert.areEqual('Updated Summary', issues[0].Summary__c, 'Summary should be updated');
+            Assert.areEqual('Updated Description', issues[0].Description__c, 'Description should be updated');
+            Assert.areEqual('Bug', issues[0].Issue_Type__c, 'Issue type should be updated');
+            Assert.areEqual('In Progress', issues[0].Status__c, 'Status should be updated');
+        }
     }
     
     /**
@@ -144,54 +170,60 @@ private class WebhookResourceTest {
      */
     @IsTest
     static void testJiraIssueDeletedWebhook() {
-        // Create a test issue record
-        Jira_Issue__c testIssue = new Jira_Issue__c(
-            Issue_Key__c = 'TEST-123',
-            Summary__c = 'Test Summary',
-            Description__c = 'Test Description',
-            Issue_Type__c = 'Task',
-            Status__c = 'To Do',
-            Project_Key__c = 'TEST',
-            Last_Updated__c = Datetime.now()
-        );
+
+		User u = [SELECT Id FROM User WHERE Alias = 'testusr'];
+
+        System.runAs(u){
+            // Create a test issue record
+            Jira_Issue__c testIssue = new Jira_Issue__c(
+                Issue_Key__c = 'TEST-123',
+                Summary__c = TEST_ISSUE_SUMMARY,
+                Description__c = 'Test Description',
+                Issue_Type__c = TEST_ISSUE_TYPE,
+                Status__c = 'To Do',
+                Project_Key__c = 'TEST',
+                Last_Updated__c = Datetime.now()
+            );
+            
+            insert testIssue;
+            
+            // Create test request
+            RestRequest req = new RestRequest();
+            req.requestURI = '/webhook/jira';
+            req.httpMethod = 'POST';
+            
+            // Create a sample Jira issue deleted payload
+            String requestBody = '{' +
+                '"webhookEvent": "jira:issue_deleted",' +
+                '"issue": {' +
+                    '"key": "TEST-123"' +
+                '}' +
+            '}';
+            
+            req.requestBody = Blob.valueOf(requestBody);
+            
+            // Set the request and response
+            RestContext.request = req;
+            RestContext.response = new RestResponse();
+
+            // Call the REST resource
+            Test.startTest();
+            WebhookResource.ResponseWrapper response = WebhookResource.doPost();
+            Test.stopTest();
+            
+            // Assert the response
+            Assert.areEqual('success', response.status, 'Response status should be success');
+            
+            // Verify that the Jira issue record was deleted
+            List<Jira_Issue__c> issues = [
+                SELECT Id
+                FROM Jira_Issue__c
+                WHERE Issue_Key__c = 'TEST-123'
+            ];
+            
+            Assert.areEqual(0, issues.size(), 'The Jira issue record should be deleted');
+        }
         
-        insert testIssue;
-        
-        // Create test request
-        RestRequest req = new RestRequest();
-        req.requestURI = '/webhook/jira';
-        req.httpMethod = 'POST';
-        
-        // Create a sample Jira issue deleted payload
-        String requestBody = '{' +
-            '"webhookEvent": "jira:issue_deleted",' +
-            '"issue": {' +
-                '"key": "TEST-123"' +
-            '}' +
-        '}';
-        
-        req.requestBody = Blob.valueOf(requestBody);
-        
-        // Set the request and response
-        RestContext.request = req;
-        RestContext.response = new RestResponse();
-        
-        // Call the REST resource
-        Test.startTest();
-        WebhookResource.ResponseWrapper response = WebhookResource.doPost();
-        Test.stopTest();
-        
-        // Assert the response
-        Assert.areEqual('success', response.status, 'Response status should be success');
-        
-        // Verify that the Jira issue record was deleted
-        List<Jira_Issue__c> issues = [
-            SELECT Id
-            FROM Jira_Issue__c
-            WHERE Issue_Key__c = 'TEST-123'
-        ];
-        
-        Assert.areEqual(0, issues.size(), 'The Jira issue record should be deleted');
     }
     
     /**
@@ -209,7 +241,7 @@ private class WebhookResourceTest {
             '"webhookEvent": "project_created",' +
             '"project": {' +
                 '"key": "TEST",' +
-                '"id": "10000",' +
+                '"id": 10000,' +
                 '"name": "Test Project",' +
                 '"description": "This is a test project"' +
             '}' +
@@ -220,27 +252,150 @@ private class WebhookResourceTest {
         // Set the request and response
         RestContext.request = req;
         RestContext.response = new RestResponse();
+
+		User u = [SELECT Id FROM User WHERE Alias = 'testusr'];
         
-        // Call the REST resource
-        Test.startTest();
-        WebhookResource.ResponseWrapper response = WebhookResource.doPost();
-        Test.stopTest();
+        System.runAs(u){
+            // Call the REST resource
+            Test.startTest();
+            WebhookResource.ResponseWrapper response = WebhookResource.doPost();
+            Test.stopTest();
+            
+            // Assert the response
+            Assert.areEqual('success', response.status, 'Response status should be success');
+            
+            // Verify that the Jira project record was created
+            List<Jira_Project__c> projects = [
+                SELECT Id, Project_Key__c, Project_ID__c, Project_Name__c, Description__c
+                FROM Jira_Project__c
+                WHERE Project_Key__c = 'TEST'
+            ];
+            
+            Assert.areEqual(1, projects.size(), 'One Jira project record should be created');
+            Assert.areEqual('TEST', projects[0].Project_Key__c, 'Project key should match');
+            Assert.areEqual('10000', projects[0].Project_ID__c, 'Project ID should match');
+            Assert.areEqual('Test Project', projects[0].Project_Name__c, 'Project name should match');
+            Assert.areEqual('This is a test project', projects[0].Description__c, 'Project description should match');
+        }
         
-        // Assert the response
-        Assert.areEqual('success', response.status, 'Response status should be success');
+    }
+    
+    /**
+     * @description Test method for Jira project updated webhook
+     */
+    @IsTest
+    static void testJiraProjectUpdatedWebhook() {
+
+        Jira_Project__c project = new Jira_Project__c();
+        project.Project_Name__c = TEST_PROJECT_NAME;
+        project.Project_Key__c = TEST_PROJECT_KEY;
+        project.Description__c = TEST_DESCRIPTION;
+
+        insert project;
+
+        // Create test request
+        RestRequest req = new RestRequest();
+        req.requestURI = '/webhook/jira';
+        req.httpMethod = 'POST';
         
-        // Verify that the Jira project record was created
-        List<Jira_Project__c> projects = [
-            SELECT Id, Project_Key__c, Project_ID__c, Project_Name__c, Description__c
-            FROM Jira_Project__c
-            WHERE Project_Key__c = 'TEST'
-        ];
+        // Create a sample Jira project created payload
+        String requestBody = '{' +
+            '"webhookEvent": "project_updated",' +
+            '"project": {' +
+                '"key": "TEST",' +
+                '"id": 10000,' +
+                '"name": "Test Project",' +
+                '"description": "This is a test project"' +
+            '}' +
+        '}';
         
-        Assert.areEqual(1, projects.size(), 'One Jira project record should be created');
-        Assert.areEqual('TEST', projects[0].Project_Key__c, 'Project key should match');
-        Assert.areEqual('10000', projects[0].Project_ID__c, 'Project ID should match');
-        Assert.areEqual('Test Project', projects[0].Project_Name__c, 'Project name should match');
-        Assert.areEqual('This is a test project', projects[0].Description__c, 'Project description should match');
+        req.requestBody = Blob.valueOf(requestBody);
+        
+        // Set the request and response
+        RestContext.request = req;
+        RestContext.response = new RestResponse();
+
+		User u = [SELECT Id FROM User WHERE Alias = 'testusr'];
+
+        System.runAs(u){
+            // Call the REST resource
+            Test.startTest();
+            WebhookResource.ResponseWrapper response = WebhookResource.doPost();
+            Test.stopTest();
+            
+            // Assert the response
+            Assert.areEqual('success', response.status, 'Response status should be success');
+            
+            // Verify that the Jira project record was created
+            List<Jira_Project__c> projects = [
+                SELECT Id, Project_Key__c, Project_ID__c, Project_Name__c, Description__c
+                FROM Jira_Project__c
+                WHERE Project_Key__c = 'TEST'
+            ];
+            
+            Assert.areEqual(1, projects.size(), 'One Jira project record should be updated');
+            Assert.areEqual('TEST', projects[0].Project_Key__c, 'Project key should match');
+            Assert.areEqual('10000', projects[0].Project_ID__c, 'Project ID should match');
+            Assert.areEqual('Test Project', projects[0].Project_Name__c, 'Project name should match');
+            Assert.areEqual('This is a test project', projects[0].Description__c, 'Project description should match');
+        }
+        
+    }
+    
+    /**
+     * @description Test method for Jira project deleted webhook
+     */
+    @IsTest
+    static void testJiraProjectDeletedWebhook() {
+
+        User u = [SELECT Id FROM User WHERE Alias = 'testusr'];
+
+        System.runAs(u){
+
+            Jira_Project__c project = new Jira_Project__c();
+            project.Project_Name__c = TEST_PROJECT_NAME;
+            project.Project_Key__c = TEST_PROJECT_KEY;
+            project.Description__c = TEST_DESCRIPTION;
+
+            insert project;
+
+            // Create test request
+            RestRequest req = new RestRequest();
+            req.requestURI = '/webhook/jira';
+            req.httpMethod = 'POST';
+            
+            // Create a sample Jira project created payload
+            String requestBody = '{' +
+                '"webhookEvent": "project_deleted",' +
+                '"project": {' +
+                    '"key": "TEST"' +
+                '}' +
+            '}';
+            
+            req.requestBody = Blob.valueOf(requestBody);
+            
+            // Set the request and response
+            RestContext.request = req;
+            RestContext.response = new RestResponse();
+
+            // Call the REST resource
+            Test.startTest();
+            WebhookResource.ResponseWrapper response = WebhookResource.doPost();
+            Test.stopTest();
+            
+            // Assert the response
+            Assert.areEqual('success', response.status, 'Response status should be success');
+            
+            // Verify that the Jira project record was created
+            List<Jira_Project__c> projects = [
+                SELECT Id, Project_Key__c, Project_ID__c, Project_Name__c, Description__c
+                FROM Jira_Project__c
+                WHERE Project_Key__c = 'TEST'
+            ];
+            
+            Assert.areEqual(0, projects.size(), 'No Jira Projects should exist after deletion');
+        }
+        
     }
     
     /**
@@ -257,15 +412,19 @@ private class WebhookResourceTest {
         // Set the request and response
         RestContext.request = req;
         RestContext.response = new RestResponse();
-        
-        // Call the REST resource
-        Test.startTest();
-        WebhookResource.ResponseWrapper response = WebhookResource.doPost();
-        Test.stopTest();
-        
-        // Assert the response
-        Assert.areEqual('error', response.status, 'Response status should be error');
-        Assert.isTrue(response.message.contains('Unsupported webhook type'), 'Error message should indicate unsupported webhook type');
+
+		User u = [SELECT Id FROM User WHERE Alias = 'testusr'];
+
+        System.runAs(u){
+            // Call the REST resource
+            Test.startTest();
+            WebhookResource.ResponseWrapper response = WebhookResource.doPost();
+            Test.stopTest();
+            
+            // Assert the response
+            Assert.areEqual('error', response.status, 'Response status should be error');
+            Assert.isTrue(response.message.contains('Unsupported webhook type'), 'Error message should indicate unsupported webhook type');
+        }
     }
     
     /**
@@ -282,13 +441,17 @@ private class WebhookResourceTest {
         // Set the request and response
         RestContext.request = req;
         RestContext.response = new RestResponse();
-        
-        // Call the REST resource
-        Test.startTest();
-        WebhookResource.ResponseWrapper response = WebhookResource.doPost();
-        Test.stopTest();
-        
-        // Assert the response
-        Assert.areEqual('error', response.status, 'Response status should be error');
+
+		User u = [SELECT Id FROM User WHERE Alias = 'testusr'];
+
+        System.runAs(u){
+            // Call the REST resource
+            Test.startTest();
+            WebhookResource.ResponseWrapper response = WebhookResource.doPost();
+            Test.stopTest();
+            
+            // Assert the response
+            Assert.areEqual('error', response.status, 'Response status should be error');
+        }
     }
 } 
