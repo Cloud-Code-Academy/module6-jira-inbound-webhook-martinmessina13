@@ -1,0 +1,26 @@
+<template>
+    <div>
+        <lightning-card title="Jira Projects">
+            <template lwc:if={projects.data}>
+                <lightning-datatable
+                    hide-checkbox-column
+                    data={projects.data}
+                    columns={jpColumns}
+                    key-field="Id"
+                ></lightning-datatable>
+            </template>
+        </lightning-card>
+    </div>
+    <div>
+        <lightning-card title="Jira Issues">
+            <template lwc:if={issues.data}>
+                <lightning-datatable
+                    hide-checkbox-column
+                    data={issues.data}
+                    columns={jiColumns}
+                    key-field="Id"
+                ></lightning-datatable>
+            </template>
+        </lightning-card>
+    </div>
+</template>

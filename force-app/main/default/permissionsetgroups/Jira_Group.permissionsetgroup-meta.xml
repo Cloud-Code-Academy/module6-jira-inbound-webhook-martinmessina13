@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Jira Group</label>
+    <permissionSets>Jira_API_Access</permissionSets>
+    <permissionSets>Jira_Integration</permissionSets>
+    <permissionSets>Jira_Issue_Read_Write</permissionSets>
+    <permissionSets>Jira_Project_Read_Write</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>
