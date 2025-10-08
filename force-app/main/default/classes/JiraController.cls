@@ -4,7 +4,7 @@ public with sharing class JiraController {
 		return [
 			SELECT Id, Project_Name__c, Project_Key__c, Description__c
 			FROM Jira_Project__c
-			WITH USER_MODE
+			
 		];
 	}
 
@@ -13,7 +13,7 @@ public with sharing class JiraController {
 		return [
 			SELECT Id, Project_Key__c, Summary__c, Description__c, Issue_Type__c
 			FROM Jira_Issue__c
-			WITH USER_MODE
+			
 		];
 	}
 }
